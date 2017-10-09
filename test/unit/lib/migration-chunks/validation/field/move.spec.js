@@ -7,7 +7,10 @@ const migrationPlan = require('../../../../../../lib/migration-chunks');
 const migrationSteps = require('../../../../../../lib/migration-steps');
 const validatePlan = require('../../../../../../lib/migration-chunks/validation');
 const stripCallsite = require('../../../../../helpers/strip-callsite');
-const stripCallsites = (plan) => plan.map((chunk) => chunk.map(stripCallsite));
+const stripCallsites = (plan) => plan.map((chunk) => {
+  chunk.steps = chunk.steps.map(stripCallsite);
+  return chunk;
+});
 
 describe('field movement plan validation', function () {
   describe('when moving a field that does not exist', function () {
@@ -355,4 +358,3 @@ describe('field movement plan validation', function () {
     }));
   });
 });
-

@@ -8,7 +8,10 @@ const migrationSteps = require('../../../../../../lib/migration-steps');
 const validatePlan = require('../../../../../../lib/migration-chunks/validation');
 
 const stripCallsite = require('../../../../../helpers/strip-callsite');
-const stripCallsites = (plan) => plan.map((chunk) => chunk.map(stripCallsite));
+const stripCallsites = (plan) => plan.map((chunk) => {
+  chunk.steps = chunk.steps.map(stripCallsite);
+  return chunk;
+});
 
 describe('field editing plan validation', function () {
   describe('when editing a field that does not exist', function () {

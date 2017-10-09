@@ -7,7 +7,7 @@ const Bluebird = require('bluebird');
 const migrationPlan = require('../../../../lib/migration-plan');
 const migrationChunks = require('../../../../lib/migration-chunks');
 const migrationSteps = require('../../../../lib/migration-steps');
-const builder = require('../../../../lib/migration-payloads/index');
+const contentTypeBuilder = require('../../../../lib/migration-payloads/content-type');
 
 describe('Payload builder', function () {
   describe('Without a Content Type payload', function () {
@@ -33,10 +33,9 @@ describe('Payload builder', function () {
       });
 
       const chunks = migrationChunks(steps);
-      const plan = migrationPlan(chunks);
-      const payload = builder(plan);
+      const payload = contentTypeBuilder(chunks);
 
-      expect(payload).to.eql([{
+      expect([payload[0].payload]).to.eql([{
         meta: {
           contentTypeId: 'person',
           version: 1,
@@ -97,9 +96,8 @@ describe('Payload builder', function () {
         dog.createField('foo').name('A foo').type('Symbol');
       });
 
-      const chunks = migrationChunks(steps);
-      const plan = migrationPlan(chunks);
-      const payloads = builder(plan, [contentType]);
+      const chunks = migrationPlan(migrationChunks(steps));
+      const payloads = contentTypeBuilder(chunks, [contentType]);
 
       const basePayload = {
         meta: {
@@ -197,7 +195,11 @@ describe('Payload builder', function () {
         }
       };
 
-      expect(payloads).to.eql([firstPayload, secondPayload, thirdPayload]);
+      expect([
+        payloads[0].payload,
+        payloads[1].payload,
+        payloads[2].payload
+      ]).to.eql([firstPayload, secondPayload, thirdPayload]);
     }));
   });
   describe('when referring to a field by its new id in the same migration', function () {
@@ -226,8 +228,7 @@ describe('Payload builder', function () {
 
       const steps = yield migrationSteps(migration);
       const chunks = migrationChunks(steps);
-      const plan = migrationPlan(chunks);
-      const payloads = builder(plan, existingCts);
+      const payloads = contentTypeBuilder(chunks, existingCts);
 
       const basePayload = {
         meta: {
@@ -290,7 +291,11 @@ describe('Payload builder', function () {
         }
       };
 
-      expect(payloads).to.eql([firstPayload, secondPayload, thirdPayload]);
+      expect([
+        payloads[0].payload,
+        payloads[1].payload,
+        payloads[2].payload
+      ]).to.eql([firstPayload, secondPayload, thirdPayload]);
     }));
   });
 
@@ -344,8 +349,7 @@ describe('Payload builder', function () {
       });
 
       const chunks = migrationChunks(steps);
-      const plan = migrationPlan(chunks);
-      const payloads = builder(plan, [contentType]);
+      const payloads = contentTypeBuilder(chunks, [contentType]);
 
       const basePayload = {
         meta: {
@@ -398,7 +402,7 @@ describe('Payload builder', function () {
         }
       };
 
-      expect(payloads).to.eql([firstPayload]);
+      expect([payloads[0].payload]).to.eql([firstPayload]);
     }));
   });
 
@@ -433,7 +437,7 @@ describe('Payload builder', function () {
 
       const chunks = migrationChunks(steps);
       const plan = migrationPlan(chunks);
-      const payloads = builder(plan, [contentType]);
+      const payloads = contentTypeBuilder(plan, [contentType]);
 
       const basePayload = {
         meta: {
@@ -454,7 +458,7 @@ describe('Payload builder', function () {
         isDelete: true
       };
 
-      expect(payloads).to.eql([deletePayload]);
+      expect([payloads[0].payload]).to.eql([deletePayload]);
     }));
   });
 });

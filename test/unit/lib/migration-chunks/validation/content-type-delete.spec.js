@@ -8,8 +8,10 @@ const migrationSteps = require('../../../../../lib/migration-steps');
 const validatePlan = require('../../../../../lib/migration-chunks/validation');
 
 const stripCallsite = require('../../../../helpers/strip-callsite');
-const stripCallsites = (plan) => plan.map((chunk) => chunk.map(stripCallsite));
-
+const stripCallsites = (plan) => plan.map((chunk) => {
+  chunk.steps = chunk.steps.map(stripCallsite);
+  return chunk;
+});
 describe('content type delete validation', function () {
   describe('when deleting a content type twice', function () {
     it('returns an error', Bluebird.coroutine(function * () {

@@ -3,16 +3,12 @@
 const { expect } = require('chai');
 const Bluebird = require('bluebird');
 
-const migrationPayloads = require('../../../../../lib/migration-payloads');
-const migrationPlan = require('../../../../../lib/migration-plan');
-const migrationChunks = require('../../../../../lib/migration-chunks');
-const migrationSteps = require('../../../../../lib/migration-steps');
-const validatePayloads = require('../../../../../lib/migration-payloads/validation');
+const validatePayloads = require('./validate-payloads');
 
 describe('payload validation (display field)', function () {
   describe('when setting a display field that does not (yet) exist', function () {
     it('returns an error', Bluebird.coroutine(function * () {
-      const steps = yield migrationSteps(function (migration) {
+      const errors = yield validatePayloads(function (migration) {
         const lunch = migration.createContentType('lunch').name('lunch');
         lunch.createField('mainCourse').name('mainCourse').type('Symbol');
 
@@ -21,11 +17,7 @@ describe('payload validation (display field)', function () {
         lunch.displayField('dessert');
         migration.createContentType('dinner').name('dinner');
         lunch.createField('dessert').name('dessert').type('Symbol');
-      });
-      const chunks = migrationChunks(steps);
-      const plan = migrationPlan(chunks);
-      const payloads = migrationPayloads(plan);
-      const errors = validatePayloads(payloads);
+      }, []);
       expect(errors).to.eql([
         [],
         [],
@@ -44,16 +36,12 @@ describe('payload validation (display field)', function () {
 
   describe('when setting a display field that does exist', function () {
     it('does not return any errors', Bluebird.coroutine(function * () {
-      const steps = yield migrationSteps(function (migration) {
+      const errors = yield validatePayloads(function (migration) {
         const lunch = migration.createContentType('lunch').name('lunch');
         lunch.createField('dessert').name('dessert').type('Symbol');
         lunch.createField('mainCourse').name('mainCourse').type('Symbol');
         lunch.displayField('dessert');
-      });
-      const chunks = migrationChunks(steps);
-      const plan = migrationPlan(chunks);
-      const payloads = migrationPayloads(plan);
-      const errors = validatePayloads(payloads);
+      }, []);
       expect(errors).to.eql([
         []
       ]);
@@ -62,7 +50,7 @@ describe('payload validation (display field)', function () {
 
   describe('when deleting a field that is set as the display field', function () {
     it('returns an error', Bluebird.coroutine(function * () {
-      const steps = yield migrationSteps(function (migration) {
+      const errors = yield validatePayloads(function (migration) {
         const lunch = migration.createContentType('lunch').name('lunch');
         lunch.createField('mainCourse').name('mainCourse').type('Symbol');
         lunch.createField('dessert').name('dessert').type('Symbol');
@@ -71,11 +59,7 @@ describe('payload validation (display field)', function () {
         migration.createContentType('dinner').name('dinner');
 
         lunch.deleteField('dessert');
-      });
-      const chunks = migrationChunks(steps);
-      const plan = migrationPlan(chunks);
-      const payloads = migrationPayloads(plan);
-      const errors = validatePayloads(payloads);
+      }, []);
       expect(errors).to.eql([
         [],
         [],

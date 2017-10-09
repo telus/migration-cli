@@ -3,9 +3,9 @@
 const { expect } = require('chai');
 const Bluebird = require('bluebird');
 
-const migrationPayloads = require('../../../lib/migration-payloads');
-const migrationChunks = require('../../../lib/migration-chunks');
+const contentTypePayloads = require('../../../lib/migration-payloads/content-type');
 const migrationPlan = require('../../../lib/migration-plan');
+const migrationChunks = require('../../../lib/migration-chunks');
 const migrationSteps = require('../../../lib/migration-steps');
 const builder = require('../../../lib/requests-builder');
 
@@ -33,8 +33,7 @@ describe('Executor', function () {
       });
 
       const chunks = migrationChunks(steps);
-      const plan = migrationPlan(chunks);
-      const payloads = migrationPayloads(plan);
+      const payloads = contentTypePayloads(chunks);
       const requests = builder(payloads);
 
       // Note: we are assuming that the 'request' has
@@ -94,8 +93,7 @@ describe('Executor', function () {
       });
 
       const chunks = migrationChunks(steps);
-      const plan = migrationPlan(chunks);
-      const payloads = migrationPayloads(plan, [{
+      const payloads = contentTypePayloads(chunks, [{
         sys: { id: 'dog', version: 10 },
         fields: [
           {
@@ -196,8 +194,7 @@ describe('Executor', function () {
       });
 
       const chunks = migrationChunks(steps);
-      const plan = migrationPlan(chunks);
-      const payloads = migrationPayloads(plan, [{
+      const payloads = contentTypePayloads(chunks, [{
         sys: { id: 'dog', version: 10 },
         fields: [
           {
@@ -374,7 +371,7 @@ describe('Executor', function () {
 
       const chunks = migrationChunks(steps);
       const plan = migrationPlan(chunks);
-      const payloads = migrationPayloads(plan);
+      const payloads = contentTypePayloads(plan);
       const requests = builder(payloads);
 
       // Note: we are assuming that the 'request' has
@@ -463,8 +460,7 @@ describe('Executor', function () {
     });
 
     const chunks = migrationChunks(steps);
-    const plan = migrationPlan(chunks);
-    const payloads = migrationPayloads(plan);
+    const payloads = contentTypePayloads(chunks);
     const requests = builder(payloads);
 
     expect(requests).to.eql([{

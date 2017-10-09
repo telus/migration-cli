@@ -35,7 +35,7 @@ describe('payload validation (dependencies)', function () {
     it('returns an error', Bluebird.coroutine(function * () {
       const existingCts = [];
 
-      const errors = validatePayloads(function (migration) {
+      const errors = yield validatePayloads(function (migration) {
         const lunch = migration.createContentType('lunch')
           .name('Lunch')
           .description('A Lunch');

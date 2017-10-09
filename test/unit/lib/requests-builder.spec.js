@@ -4,6 +4,7 @@ const { expect } = require('chai');
 const Bluebird = require('bluebird');
 
 const migrationPayloads = require('../../../lib/migration-payloads');
+const migrationPlan = require('../../../lib/migration-plan');
 const migrationChunks = require('../../../lib/migration-chunks');
 const migrationSteps = require('../../../lib/migration-steps');
 const builder = require('../../../lib/requests-builder');
@@ -369,7 +370,8 @@ describe('Executor', function () {
       });
 
       const chunks = migrationChunks(steps);
-      const payloads = migrationPayloads(chunks);
+      const plan = migrationPlan(chunks);
+      const payloads = migrationPayloads(plan);
       const requests = builder(payloads);
 
       // Note: we are assuming that the 'request' has

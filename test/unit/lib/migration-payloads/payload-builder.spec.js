@@ -35,7 +35,7 @@ describe('Payload builder', function () {
       const chunks = migrationChunks(steps);
       const payload = builder(chunks);
 
-      expect(payload).to.eql([{
+      expect([payload[0].payload]).to.eql([{
         meta: {
           contentTypeId: 'person',
           version: 1,
@@ -96,7 +96,7 @@ describe('Payload builder', function () {
         dog.createField('foo').name('A foo').type('Symbol');
       });
 
-      const chunks = migrationChunks(steps);
+      const chunks = migrationPlan(migrationChunks(steps));
       const payloads = builder(chunks, [contentType]);
 
       const basePayload = {
@@ -195,7 +195,11 @@ describe('Payload builder', function () {
         }
       };
 
-      expect(payloads).to.eql([firstPayload, secondPayload, thirdPayload]);
+      expect([
+        payloads[0].payload,
+        payloads[1].payload,
+        payloads[2].payload
+      ]).to.eql([firstPayload, secondPayload, thirdPayload]);
     }));
   });
   describe('when referring to a field by its new id in the same migration', function () {
@@ -287,7 +291,11 @@ describe('Payload builder', function () {
         }
       };
 
-      expect(payloads).to.eql([firstPayload, secondPayload, thirdPayload]);
+      expect([
+        payloads[0].payload,
+        payloads[1].payload,
+        payloads[2].payload
+      ]).to.eql([firstPayload, secondPayload, thirdPayload]);
     }));
   });
 
@@ -394,7 +402,7 @@ describe('Payload builder', function () {
         }
       };
 
-      expect(payloads).to.eql([firstPayload]);
+      expect([payloads[0].payload]).to.eql([firstPayload]);
     }));
   });
 

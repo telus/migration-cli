@@ -4,6 +4,7 @@ const { expect } = require('chai');
 const _ = require('lodash');
 const Bluebird = require('bluebird');
 
+const migrationPlan = require('../../../../lib/migration-plan');
 const migrationChunks = require('../../../../lib/migration-chunks');
 const migrationSteps = require('../../../../lib/migration-steps');
 const builder = require('../../../../lib/migration-payloads');
@@ -427,7 +428,8 @@ describe('Payload builder', function () {
       });
 
       const chunks = migrationChunks(steps);
-      const payloads = builder(chunks, [contentType]);
+      const plan = migrationPlan(chunks);
+      const payloads = builder(plan, [contentType]);
 
       const basePayload = {
         meta: {
@@ -448,7 +450,7 @@ describe('Payload builder', function () {
         isDelete: true
       };
 
-      expect(payloads).to.eql([deletePayload]);
+      expect([payloads[0].payload]).to.eql([deletePayload]);
     }));
   });
 });

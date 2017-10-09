@@ -300,27 +300,14 @@ describe('migration-chunks', function () {
           }
         }],
         [{
-          type: 'field/update',
+          type: 'field/delete',
           meta: {
             contentTypeInstanceId: 'contentType/person/0',
             fieldInstanceId: 'fields/favoriteColor/0'
           },
           payload: {
             contentTypeId: 'person',
-            fieldId: 'favoriteColor',
-            props: { omitted: true }
-          }
-        }],
-        [{
-          type: 'field/update',
-          meta: {
-            contentTypeInstanceId: 'contentType/person/0',
-            fieldInstanceId: 'fields/favoriteColor/0'
-          },
-          payload: {
-            contentTypeId: 'person',
-            fieldId: 'favoriteColor',
-            props: { deleted: true }
+            fieldId: 'favoriteColor'
           }
         }],
         [{

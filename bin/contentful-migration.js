@@ -83,10 +83,10 @@ const run = Bluebird.coroutine(function * () {
     return client.rawRequest(requestConfig);
   };
 
-  let chunks;
+  let plan;
   const migrationParser = createMigrationParser(makeRequest, {
-    onChunks: function (_chunks) {
-      chunks = _chunks;
+    onPlan: function (_plan) {
+      plan = _plan;
     }
   });
 
@@ -103,8 +103,8 @@ const run = Bluebird.coroutine(function * () {
       message = renderFailedValidation(error.details, renderStepsErrors);
     }
     if (error instanceof PayloadValidationError) {
-      const chunksAndErrors = _.zip(chunks, error.details);
-      message = renderFailedValidation(chunksAndErrors, renderPlanMessages.withErrors);
+      const planAndErrors = _.zip(plan, error.details);
+      message = renderFailedValidation(planAndErrors, renderPlanMessages.withErrors);
     }
     if (error instanceof SpaceAccessError) {
       message = [
@@ -118,7 +118,7 @@ const run = Bluebird.coroutine(function * () {
   }
 
   console.log(chalk`{bold.green The following migration has been planned}\n`);
-  console.log(renderPlanMessages.withoutErrors(chunks));
+  console.log(renderPlanMessages.withoutErrors(plan));
   console.log('\n');
 
   const tasks = requests.map((request) => {

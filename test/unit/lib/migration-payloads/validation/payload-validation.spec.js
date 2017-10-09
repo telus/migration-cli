@@ -3,24 +3,16 @@
 const { expect } = require('chai');
 const Bluebird = require('bluebird');
 
-const migrationPayloads = require('../../../../../lib/migration-payloads');
-const migrationPlan = require('../../../../../lib/migration-plan');
-const migrationChunks = require('../../../../../lib/migration-chunks');
-const migrationSteps = require('../../../../../lib/migration-steps');
-const validatePayloads = require('../../../../../lib/migration-payloads/validation');
+const validatePayloads = require('./validate-payloads');
 
 describe('payload validation', function () {
   describe('when missing required properties', function () {
     it('returns the errors', Bluebird.coroutine(function * () {
-      const steps = yield migrationSteps(function (migration) {
+      const errors = yield validatePayloads(function (migration) {
         const lunch = migration.createContentType('lunch');
 
         lunch.createField('menu');
-      });
-      const chunks = migrationChunks(steps);
-      const plan = migrationPlan(chunks);
-      const payloads = migrationPayloads(plan);
-      const errors = validatePayloads(payloads);
+      }, []);
 
       expect(errors).to.eql([
         [
@@ -43,7 +35,7 @@ describe('payload validation', function () {
 
   describe('when adding more than 50 fields', function () {
     it('returns the errors', Bluebird.coroutine(function * () {
-      const steps = yield migrationSteps(function (migration) {
+      const errors = yield validatePayloads(function (migration) {
         const lunch = migration.createContentType('lunch');
         lunch.name('A lunch');
 
@@ -52,11 +44,7 @@ describe('payload validation', function () {
             .type('Symbol')
             .name(`menu${i}`);
         }
-      });
-      const chunks = migrationChunks(steps);
-      const plan = migrationPlan(chunks);
-      const payloads = migrationPayloads(plan);
-      const errors = validatePayloads(payloads);
+      }, []);
       expect(errors).to.eql([
         [
           {
@@ -85,18 +73,14 @@ describe('payload validation', function () {
       ];
 
       for (const type of types) {
-        const steps = yield migrationSteps(function (migration) {
+        const errors = yield validatePayloads(function (migration) {
           const lunch = migration.createContentType('lunch');
           lunch.name('A lunch');
 
           lunch.createField(type)
             .type(type)
             .name(type);
-        });
-        const chunks = migrationChunks(steps);
-        const plan = migrationPlan(chunks);
-        const payloads = migrationPayloads(plan);
-        const errors = validatePayloads(payloads);
+        }, []);
         expect(errors).to.eql([[]]);
       }
     }));
@@ -104,18 +88,15 @@ describe('payload validation', function () {
 
   describe('when using an invalid type', function () {
     it('returns the errors', Bluebird.coroutine(function * () {
-      const steps = yield migrationSteps(function (migration) {
+      const errors = yield validatePayloads(function (migration) {
         const lunch = migration.createContentType('lunch');
         lunch.name('A lunch');
 
         lunch.createField('invalid')
           .type('Invalid')
           .name('invalid');
-      });
-      const chunks = migrationChunks(steps);
-      const plan = migrationPlan(chunks);
-      const payloads = migrationPayloads(plan);
-      const errors = validatePayloads(payloads);
+      }, []);
+
       const valid = `["Symbol", "Text", "Integer", "Number", "Date", "Boolean", "Object", "Link", "Array", "Location"]`;
       expect(errors).to.eql([
         [

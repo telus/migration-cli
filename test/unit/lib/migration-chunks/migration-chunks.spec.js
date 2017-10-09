@@ -44,8 +44,9 @@ describe('migration-chunks', function () {
         });
       });
 
-      const chunks = stripCallsites(migrationChunks(steps));
-
+      const fullChunks = migrationChunks(steps);
+      const chunkSteps = fullChunks.map((chunk) => chunk.steps);
+      const chunks = stripCallsites(chunkSteps);
 
       expect(chunks).to.eql([
         [{
@@ -256,9 +257,11 @@ describe('migration-chunks', function () {
         });
       });
 
-      const plan = stripCallsites(migrationChunks(steps));
+      const fullChunks = migrationChunks(steps);
+      const chunkSteps = fullChunks.map((chunk) => chunk.steps);
+      const chunks = stripCallsites(chunkSteps);
 
-      expect(plan).to.eql([
+      expect(chunks).to.eql([
         [{
           type: 'field/create',
           meta: {
@@ -297,14 +300,27 @@ describe('migration-chunks', function () {
           }
         }],
         [{
-          type: 'field/delete',
+          type: 'field/update',
           meta: {
             contentTypeInstanceId: 'contentType/person/0',
             fieldInstanceId: 'fields/favoriteColor/0'
           },
           payload: {
             contentTypeId: 'person',
-            fieldId: 'favoriteColor'
+            fieldId: 'favoriteColor',
+            props: { omitted: true }
+          }
+        }],
+        [{
+          type: 'field/update',
+          meta: {
+            contentTypeInstanceId: 'contentType/person/0',
+            fieldInstanceId: 'fields/favoriteColor/0'
+          },
+          payload: {
+            contentTypeId: 'person',
+            fieldId: 'favoriteColor',
+            props: { deleted: true }
           }
         }],
         [{
@@ -334,9 +350,11 @@ describe('migration-chunks', function () {
         book.editField('newTitle').name('new Title');
       });
 
-      const plan = stripCallsites(migrationChunks(steps));
+      const fullChunks = migrationChunks(steps);
+      const chunkSteps = fullChunks.map((chunk) => chunk.steps);
+      const chunks = stripCallsites(chunkSteps);
 
-      expect(plan).to.eql([
+      expect(chunks).to.eql([
         [{
           type: 'field/update',
           meta: {
@@ -393,9 +411,11 @@ describe('migration-chunks', function () {
         });
       });
 
-      const plan = stripCallsites(migrationChunks(steps));
+      const fullChunks = migrationChunks(steps);
+      const chunkSteps = fullChunks.map((chunk) => chunk.steps);
+      const chunks = stripCallsites(chunkSteps);
 
-      expect(plan).to.eql([
+      expect(chunks).to.eql([
         [{
           type: 'contentType/delete',
           meta: {
@@ -444,8 +464,11 @@ describe('migration-chunks', function () {
         });
       });
 
-      const plan = stripCallsites(migrationChunks(steps));
-      expect(plan).to.eql([
+      const fullChunks = migrationChunks(steps);
+      const chunkSteps = fullChunks.map((chunk) => chunk.steps);
+      const chunks = stripCallsites(chunkSteps);
+
+      expect(chunks).to.eql([
         [{
           'type': 'field/create',
           'meta': {

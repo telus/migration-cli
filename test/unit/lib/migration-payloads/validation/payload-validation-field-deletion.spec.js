@@ -3,21 +3,11 @@
 const { expect } = require('chai');
 const Bluebird = require('bluebird');
 
-const migrationPayloads = require('../../../../../lib/migration-payloads');
-const migrationPlan = require('../../../../../lib/migration-plan');
-const migrationChunks = require('../../../../../lib/migration-chunks');
-const migrationSteps = require('../../../../../lib/migration-steps');
-const validatePayloads = require('../../../../../lib/migration-payloads/validation');
+const validatePayloads = require('./validate-payloads');
 
 describe('payload validation (deletion)', function () {
   describe('when setting a field to deleted that is not omitted', function () {
     it('returns an error', Bluebird.coroutine(function * () {
-      const steps = yield migrationSteps(function (migration) {
-        const lunch = migration.editContentType('lunch');
-
-        lunch.editField('mainCourse').deleted(true);
-      });
-
       const existingCts = [{
         sys: { id: 'lunch' },
         name: 'Lunch',
@@ -26,10 +16,11 @@ describe('payload validation (deletion)', function () {
         ]
       }];
 
-      const chunks = migrationChunks(steps);
-      const plan = migrationPlan(chunks);
-      const payloads = migrationPayloads(plan, existingCts);
-      const errors = validatePayloads(payloads);
+      const errors = yield validatePayloads(function (migration) {
+        const lunch = migration.editContentType('lunch');
+
+        lunch.editField('mainCourse').deleted(true);
+      }, existingCts);
       expect(errors).to.eql([
         [
           {
@@ -43,12 +34,6 @@ describe('payload validation (deletion)', function () {
 
   describe('when setting a field to deleted and omitted in one step', function () {
     it('returns an error', Bluebird.coroutine(function * () {
-      const steps = yield migrationSteps(function (migration) {
-        const lunch = migration.editContentType('lunch');
-
-        lunch.editField('mainCourse').deleted(true).omitted(true);
-      });
-
       const existingCts = [{
         sys: { id: 'lunch' },
         name: 'Lunch',
@@ -57,10 +42,11 @@ describe('payload validation (deletion)', function () {
         ]
       }];
 
-      const chunks = migrationChunks(steps);
-      const plan = migrationPlan(chunks);
-      const payloads = migrationPayloads(plan, existingCts);
-      const errors = validatePayloads(payloads);
+      const errors = yield validatePayloads(function (migration) {
+        const lunch = migration.editContentType('lunch');
+
+        lunch.editField('mainCourse').deleted(true).omitted(true);
+      }, existingCts);
       expect(errors).to.eql([
         [
           {
@@ -74,12 +60,6 @@ describe('payload validation (deletion)', function () {
 
   describe('when setting a field to omitted and then deleted', function () {
     it('returns an error', Bluebird.coroutine(function * () {
-      const steps = yield migrationSteps(function (migration) {
-        const lunch = migration.editContentType('lunch');
-
-        lunch.editField('mainCourse').deleted(true);
-      });
-
       const existingCts = [{
         sys: { id: 'lunch' },
         name: 'Lunch',
@@ -88,10 +68,11 @@ describe('payload validation (deletion)', function () {
         ]
       }];
 
-      const chunks = migrationChunks(steps);
-      const plan = migrationPlan(chunks);
-      const payloads = migrationPayloads(plan, existingCts);
-      const errors = validatePayloads(payloads);
+      const errors = yield validatePayloads(function (migration) {
+        const lunch = migration.editContentType('lunch');
+
+        lunch.editField('mainCourse').deleted(true);
+      }, existingCts);
       expect(errors).to.eql([
         []
       ]);

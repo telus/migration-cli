@@ -1,7 +1,7 @@
 module.exports = function (migration) {
   const dog = migration.editContentType('dog');
 
-  dog.createField('owner')
+  dog.createField('owner4')
     .type('Symbol')
     .name('Owner name')
     .required(false);
@@ -14,7 +14,7 @@ module.exports = function (migration) {
 
   dog.transformContent({
     from: ['name'],
-    to: ['owner'],
+    to: ['owner4'],
     transform: ([name]) => [`${name}'s owner`]
   });
 };

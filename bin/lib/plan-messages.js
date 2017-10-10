@@ -113,7 +113,6 @@ module.exports = {
   withoutErrors: (plan) => {
     const messages = plan.map((chunk) => {
       const { steps } = chunk;
-
       return renderChunk(steps);
     });
 

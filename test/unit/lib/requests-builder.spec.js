@@ -478,4 +478,93 @@ describe('Executor', function () {
       }
     }]);
   }));
+
+  describe('Content transform entries', function () {
+    it.only('creates the right entries', Bluebird.coroutine(function * () {
+      const steps = yield migrationSteps(function up (migration) {
+        const person = migration.editContentType('person');
+        person.transformContent({
+          from: ['firstName', 'lastName'],
+          transform: (names) => {
+            return names.join(' ');
+          },
+          to: ['fullName']
+        });
+      });
+
+      const chunks = migrationChunks(steps);
+      const plan = migrationPlan(chunks);
+      const entries = [{
+        sys: {
+          contentType: { sys: { id: 'person' } },
+          version: 10
+        },
+        fields: {
+          firstName: { 'en-US': 'Heinz' },
+          lastName: { 'en-US': 'Fernandez' },
+          fullName: { 'en-US': 'Heinz Fernandez' }
+        }
+      },
+      {
+        sys: {
+          contentType: { sys: { id: 'person' } },
+          version: 10
+        },
+        fields: {
+          firstName: { 'en-US': 'Mickey' },
+          lastName: { 'en-US': 'Mouse' },
+          fullName: { 'en-US': 'Mickey Mouse' }
+        }
+      }];
+
+      const payloads = contentTypePayloads(plan, [{
+        sys: { id: 'person', version: 10 },
+        fields: [{
+          id: 'firstName',
+          type: 'Text',
+          name: 'first name'
+        },
+        {
+          id: 'lastName',
+          type: 'Text',
+          name: 'last name'
+        },
+        {
+          id: 'fullName`',
+          type: 'Text',
+          name: 'full name'
+        }]
+      }], entries);
+
+      const requests = builder(payloads);
+
+      expect(requests).to.eql([{
+        url: '/entries/xyz',
+        method: 'PUT',
+        headers: {
+          'X-Contentful-Version': 10
+        },
+        data: {
+          fields: {
+            firstName: { 'en-US': 'Heinz' },
+            lastName: { 'en-US': 'Fernandez' },
+            fullName: { 'en-US': 'Heinz Fernandez' }
+          }
+        }
+      }, {
+        url: '/entries/abc',
+        method: 'PUT',
+        headers: {
+          'X-Contentful-Version': 10
+        },
+        data: {
+          fields: {
+            firstName: { 'en-US': 'Mickey' },
+            lastName: { 'en-US': 'Mouse' },
+            fullName: { 'en-US': 'Mickey Mouse' }
+          }
+        }
+      }]);
+    }));
+  });
 });

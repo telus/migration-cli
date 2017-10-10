@@ -7,7 +7,7 @@ const Bluebird = require('bluebird');
 const migrationPlan = require('../../../../lib/migration-plan');
 const migrationChunks = require('../../../../lib/migration-chunks');
 const migrationSteps = require('../../../../lib/migration-steps');
-const contentTypeBuilder = require('../../../../lib/migration-payloads/content-type');
+const payloadBuilder = require('../../../../lib/migration-payloads');
 
 describe('Payload builder', function () {
   describe('Without a Content Type payload', function () {
@@ -33,7 +33,7 @@ describe('Payload builder', function () {
       });
 
       const chunks = migrationChunks(steps);
-      const payload = contentTypeBuilder(chunks);
+      const payload = payloadBuilder(chunks);
 
       expect([payload[0].payload]).to.eql([{
         meta: {
@@ -97,7 +97,7 @@ describe('Payload builder', function () {
       });
 
       const chunks = migrationPlan(migrationChunks(steps));
-      const payloads = contentTypeBuilder(chunks, [contentType]);
+      const payloads = payloadBuilder(chunks, [contentType]);
 
       const basePayload = {
         meta: {
@@ -228,7 +228,7 @@ describe('Payload builder', function () {
 
       const steps = yield migrationSteps(migration);
       const chunks = migrationChunks(steps);
-      const payloads = contentTypeBuilder(chunks, existingCts);
+      const payloads = payloadBuilder(chunks, existingCts);
 
       const basePayload = {
         meta: {
@@ -349,7 +349,7 @@ describe('Payload builder', function () {
       });
 
       const chunks = migrationChunks(steps);
-      const payloads = contentTypeBuilder(chunks, [contentType]);
+      const payloads = payloadBuilder(chunks, [contentType]);
 
       const basePayload = {
         meta: {
@@ -437,7 +437,7 @@ describe('Payload builder', function () {
 
       const chunks = migrationChunks(steps);
       const plan = migrationPlan(chunks);
-      const payloads = contentTypeBuilder(plan, [contentType]);
+      const payloads = payloadBuilder(plan, [contentType]);
 
       const basePayload = {
         meta: {

@@ -3,7 +3,8 @@
 const { expect } = require('chai');
 const Bluebird = require('bluebird');
 
-const contentTypePayloads = require('../../../lib/migration-payloads/content-type');
+const payloadBuilder = require('../../../lib/migration-payloads');
+const entryPayloads = require('../../../lib/migration-payloads/entry');
 const migrationPlan = require('../../../lib/migration-plan');
 const migrationChunks = require('../../../lib/migration-chunks');
 const migrationSteps = require('../../../lib/migration-steps');
@@ -33,7 +34,7 @@ describe('Executor', function () {
       });
 
       const chunks = migrationChunks(steps);
-      const payloads = contentTypePayloads(chunks);
+      const payloads = payloadBuilder(chunks);
       const requests = builder(payloads);
 
       // Note: we are assuming that the 'request' has
@@ -93,7 +94,7 @@ describe('Executor', function () {
       });
 
       const chunks = migrationChunks(steps);
-      const payloads = contentTypePayloads(chunks, [{
+      const payloads = payloadBuilder(chunks, [{
         sys: { id: 'dog', version: 10 },
         fields: [
           {
@@ -194,7 +195,7 @@ describe('Executor', function () {
       });
 
       const chunks = migrationChunks(steps);
-      const payloads = contentTypePayloads(chunks, [{
+      const payloads = payloadBuilder(chunks, [{
         sys: { id: 'dog', version: 10 },
         fields: [
           {
@@ -371,7 +372,7 @@ describe('Executor', function () {
 
       const chunks = migrationChunks(steps);
       const plan = migrationPlan(chunks);
-      const payloads = contentTypePayloads(plan);
+      const payloads = payloadBuilder(plan);
       const requests = builder(payloads);
 
       // Note: we are assuming that the 'request' has
@@ -460,7 +461,7 @@ describe('Executor', function () {
     });
 
     const chunks = migrationChunks(steps);
-    const payloads = contentTypePayloads(chunks);
+    const payloads = payloadBuilder(chunks);
     const requests = builder(payloads);
 
     expect(requests).to.eql([{
@@ -480,13 +481,13 @@ describe('Executor', function () {
   }));
 
   describe('Content transform entries', function () {
-    it.only('creates the right entries', Bluebird.coroutine(function * () {
+    it('creates the right entries', Bluebird.coroutine(function * () {
       const steps = yield migrationSteps(function up (migration) {
         const person = migration.editContentType('person');
         person.transformContent({
           from: ['firstName', 'lastName'],
           transform: (names) => {
-            return names.join(' ');
+            return [names.join(' ')];
           },
           to: ['fullName']
         });
@@ -494,30 +495,36 @@ describe('Executor', function () {
 
       const chunks = migrationChunks(steps);
       const plan = migrationPlan(chunks);
-      const entries = [{
-        sys: {
-          contentType: { sys: { id: 'person' } },
-          version: 10
-        },
-        fields: {
-          firstName: { 'en-US': 'Heinz' },
-          lastName: { 'en-US': 'Fernandez' },
-          fullName: { 'en-US': 'Heinz Fernandez' }
-        }
-      },
-      {
-        sys: {
-          contentType: { sys: { id: 'person' } },
-          version: 10
-        },
-        fields: {
-          firstName: { 'en-US': 'Mickey' },
-          lastName: { 'en-US': 'Mouse' },
-          fullName: { 'en-US': 'Mickey Mouse' }
-        }
-      }];
+      const entries = {
+        person: [
+          {
+            sys: {
+              contentType: { sys: { id: 'person' } },
+              version: 10,
+              id: 'xyz'
+            },
+            fields: {
+              firstName: { 'en-US': 'Heinz' },
+              lastName: { 'en-US': 'Fernandez' },
+              fullName: { 'en-US': 'Heinz Fernandez' }
+            }
+          },
+          {
+            sys: {
+              contentType: { sys: { id: 'person' } },
+              version: 10,
+              id: 'abc'
+            },
+            fields: {
+              firstName: { 'en-US': 'Mickey' },
+              lastName: { 'en-US': 'Mouse' },
+              fullName: { 'en-US': 'Mickey Mouse' }
+            }
+          }
+        ]
+      };
 
-      const payloads = contentTypePayloads(plan, [{
+      const contentTypes = [{
         sys: { id: 'person', version: 10 },
         fields: [{
           id: 'firstName',
@@ -534,8 +541,9 @@ describe('Executor', function () {
           type: 'Text',
           name: 'full name'
         }]
-      }], entries);
+      }];
 
+      const payloads = payloadBuilder(plan, contentTypes, entries);
       const requests = builder(payloads);
 
       expect(requests).to.eql([{

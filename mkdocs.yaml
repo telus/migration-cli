@@ -1,0 +1,6 @@
+site_name: migration-cli
+site_description: Documentation for migration-cli
+plugins:
+  - techdocs-core
+nav:
+  - Validation: validation.md
